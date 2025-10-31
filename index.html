@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🦅TheGitano - Buscador de Instagram</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+    <div id="root"></div>
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        function App() {
+            const [category, setCategory] = useState('');
+            const [city, setCity] = useState('');
+            const [state, setState] = useState('');
+            const [searchLinks, setSearchLinks] = useState([]);
+            const [activeTab, setActiveTab] = useState('search');
+
+            const categories = {
+                renta: { icon: '🏠', name: 'Renta', keywords: ['apartments', 'rent', 'rental'] },
+                venta: { icon: '🏡', name: 'Venta', keywords: ['realestate', 'forsale', 'property'] },
+                restaurantes: { icon: '🍽️', name: 'Restaurantes', keywords: ['restaurant', 'food', 'dining'] },
+                fitness: { icon: '💪', name: 'Fitness', keywords: ['gym', 'fitness', 'workout'] }
+            };
+
+            const states = ['FL', 'CA', 'NY', 'TX', 'IL'];
+
+            const generateSearches = () => {
+                if (!category || !city) {
+                    alert('Selecciona categoría y ciudad');
+                    return;
+                }
+
+                const links = [];
+                const categoryData = categories[category];
+                const cityClean = city.toLowerCase().replace(/\s+/g, '');
+
+                categoryData.keywords.forEach(kw => {
+                    const hashtag = `${kw}${cityClean}`;
+                    links.push({
+                        type: 'Hashtag',
+                        query: `#${hashtag}`,
+                        url: `https://www.instagram.com/explore/tags/${hashtag}/`
+                    });
+                });
+
+                setSearchLinks(links);
+                setActiveTab('results');
+            };
+
+            return (
+                <div className="min-h-screen bg-gradient-to-br from-purple-100 to-pink-100">
+                    <header className="bg-gradient-to-r from-purple-600 to-pink-600 text-white p-4">
+                        <h1 className="text-2xl font-bold">🦅 TheGitano 🦅</h1>
+                        <p className="text-sm">Buscador de Instagram</p>
+                    </header>
+
+                    <main className="max-w-4xl mx-auto p-4">
+                        {activeTab === 'search' && (
+                            <div className="bg-white rounded-lg shadow-lg p-6">
+                                <h2 className="text-xl font-bold mb-4">Nueva Búsqueda</h2>
+                                
+                                <label className="block mb-2 font-semibold">Categoría *</label>
+                                <div className="grid grid-cols-2 gap-2 mb-4">
+                                    {Object.entries(categories).map(([key, cat]) => (
+                                        <button
+                                            key={key}
+                                            onClick={() => setCategory(key)}
+                                            className={`p-4 border-2 rounded-lg ${category === key ? 'border-purple-600 bg-purple-50' : 'border-gray-200'}`}
+                                        >
+                                            <div className="text-3xl">{cat.icon}</div>
+                                            <div className="font-semibold">{cat.name}</div>
+                                        </button>
+                                    ))}
+                                </div>
+
+                                <label className="block mb-2 font-semibold">Ciudad *</label>
+                                <input
+                                    type="text"
+                                    value={city}
+                                    onChange={(e) => setCity(e.target.value)}
+                                    placeholder="Ej: Miami"
+                                    className="w-full p-3 border-2 rounded-lg mb-4"
+                                />
+
+                                <label className="block mb-2 font-semibold">Estado (opcional)</label>
+                                <select
+                                    value={state}
+                                    onChange={(e) => setState(e.target.value)}
+                                    className="w-full p-3 border-2 rounded-lg mb-4"
+                                >
+                                    <option value="">Selecciona</option>
+                                    {states.map(s => (
+                                        <option key={s} value={s}>{s}</option>
+                                    ))}
+                                </select>
+
+                                <button
+                                    onClick={generateSearches}
+                                    className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold py-3 rounded-lg"
+                                >
+                                    🔍 Generar Búsquedas
+                                </button>
+                            </div>
+                        )}
+
+                        {activeTab === 'results' && (
+                            <div className="bg-white rounded-lg shadow-lg p-6">
+                                <div className="flex justify-between items-center mb-4">
+                                    <h2 className="text-xl font-bold">Resultados ({searchLinks.length})</h2>
+                                    <button
+                                        onClick={() => setActiveTab('search')}
+                                        className="text-purple-600 font-semibold"
+                                    >
+                                        ← Volver
+                                    </button>
+                                </div>
+                                
+                                {searchLinks.length === 0 ? (
+                                    <p className="text-gray-500 text-center py-8">No hay resultados</p>
+                                ) : (
+                                    <div className="space-y-3">
+                                        {searchLinks.map((link, idx) => (
+                                            <a
+                                                key={idx}
+                                                href={link.url}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="block p-4 bg-purple-50 rounded-lg hover:bg-purple-100 border-2 border-transparent hover:border-purple-300"
+                                            >
+                                                <div className="text-xs text-purple-600 mb-1">{link.type}</div>
+                                                <div className="text-lg font-bold">{link.query}</div>
+                                            </a>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                    </main>
+
+                    <footer className="text-center py-4 text-gray-600">
+                        <p>Creado por TheGitano 🦅</p>
+                    </footer>
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
